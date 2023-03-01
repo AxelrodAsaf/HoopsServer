@@ -3,16 +3,16 @@ const mongoose = require("mongoose");
 // Define a way to save a certain set of fields of data
 const gameSchema = new mongoose.Schema({
   gameID: {
-    type: Number,
+    type: String,
     required: true,
     unique: true
   },
   startTime: {
-    type: String,
+    type: Number,
     required: true
   },
   endTime: {
-    type: String,
+    type: Number,
     required: true
   },
   location: {

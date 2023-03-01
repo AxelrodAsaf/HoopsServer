@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 // Define a way to save a certain set of fields of data
 const locationSchema = new mongoose.Schema({
   locationID: {
-    type: Number,
+    type: String,
     required: true,
     unique: true,
   },
