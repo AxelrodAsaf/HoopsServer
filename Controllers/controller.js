@@ -1,7 +1,5 @@
 const Game = require("../models/Game");
 const Location = require("../models/Location");
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 exports.createGame = async (req, res) => {
@@ -41,7 +39,7 @@ exports.createGame = async (req, res) => {
     try {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new game with email: ${newGame.gameID}`);
       await newGame.save();
-      return res.json({ message: "Game saved successfully" });
+      return res.status(200).json({ message: "Game saved successfully" });
     } catch (err) {
       console.error(err);
     }
@@ -63,7 +61,7 @@ exports.approveGame = async (req, res) => {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to approve game with gameID: ${game.gameID}`);
       game.approved = true;
       await game.save();
-      return res.json({ message: "Game approved successfully" });
+      return res.status(200).json({ message: "Game approved successfully" });
     } catch (err) {
       return res.status(500).json({ message: err });
     }
@@ -85,7 +83,7 @@ exports.rejectGame = async (req, res) => {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to reject game with gameID: ${game.gameID}`);
       game.approved = false;
       await game.save();
-      return res.json({ message: "Game rejected successfully" });
+      return res.status(200).json({ message: "Game rejected successfully" });
     } catch (err) {
       return res.status(500).json({ message: err });
     }
@@ -103,7 +101,7 @@ exports.deleteGame = async (req, res) => {
     try {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to delete game with gameID: ${game.gameID}`);
       await Game.deleteOne({ gameID: gameID });
-      return res.json({ message: "Game deleted successfully" });
+      return res.status(200).json({ message: "Game deleted successfully" });
     } catch (err) {
       return res.status(500).json({ message: err });
     }
@@ -126,7 +124,7 @@ exports.addPlayer = async (req, res) => {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to add player: ${player} to game with gameID: ${game.gameID}`);
       game.participants.push(player);
       await game.save();
-      return res.json({ message: "Player added successfully" });
+      return res.status(200).json({ message: "Player added successfully" });
     } catch (err) {
       return res.status(500).json({ message: err });
     }
@@ -149,7 +147,7 @@ exports.removePlayer = async (req, res) => {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to remove player: ${player} from game with gameID: ${game.gameID}`);
       game.participants.splice(game.participants.indexOf(player), 1);
       await game.save();
-      return res.json({ message: "Player removed successfully" });
+      return res.status(200).json({ message: "Player removed successfully" });
     } catch (err) {
       return res.status(500).json({ message: err });
     }
@@ -185,7 +183,7 @@ exports.addLocation = async (req, res) => {
     try {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new location with locationID: ${newLocation.locationID}`);
       await newLocation.save();
-      return res.json({ message: "Location saved successfully" });
+      return res.status(200).json({ message: "Location saved successfully" });
     } catch (err) {
       console.error(err);
     }
@@ -203,7 +201,7 @@ exports.removeLocation = async (req, res) => {
     try {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to delete location with locationID: ${location.locationID}`);
       await Location.deleteOne({ locationID: locationID });
-      return res.json({ message: "Location deleted successfully" });
+      return res.status(200).json({ message: "Location deleted successfully" });
     } catch (err) {
       return res.status(500).json({ message: err });
     }
