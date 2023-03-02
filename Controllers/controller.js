@@ -1,4 +1,5 @@
 const Game = require("../models/Game");
+const User = require("../models/User");
 const Location = require("../models/Location");
 require('dotenv').config();
 
@@ -6,7 +7,6 @@ exports.createGame = async (req, res) => {
   const date = req.body.date;
   const startTime = req.body.startTime;
   const endTime = req.body.endTime;
-  const location = req.body.location;
   const participants = req.body.participants;
   const createdByUser = req.body.createdByUser;
   const ageMin = req.body.ageMin;
@@ -15,14 +15,15 @@ exports.createGame = async (req, res) => {
   const approved = req.body.approved;
   const tlvpremium = req.body.tlvpremium;
   const price = req.body.price;
-  const gameID = startTime+location+createdByUser;
+  const locationID = req.body.locationID;
+  const gameID = date + "/" + startTime + "/" + locationID;
 
   const newGame = new Game({
+    locationID: locationID,
     date: date,
     gameID: gameID,
     startTime: startTime,
     endTime: endTime,
-    location: location,
     participants: participants,
     createdByUser: createdByUser,
     ageMin: ageMin,
@@ -38,15 +39,21 @@ exports.createGame = async (req, res) => {
     return res.status(409).json({ message: "Game already exists" });
   }
   else {
-    if (await Location.findOne({ location: location })) {
-      try {
-        console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new game with email: ${newGame.gameID}`);
-        await newGame.save();
-        return res.status(200).json({ message: "Game saved successfully" });
-      } catch (err) {
-        console.error(err);
+    if (await Location.findOne({ locationID: locationID })) {
+      if (await Game.findOne({ gameID: gameID })) {
+        return res.status(409).json({ message: "Game already exists" });
       }
-    } else {
+      else {
+        try {
+          console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new game created by ${createdByUser}`);
+          await newGame.save();
+          return res.status(200).json({ message: "Game saved successfully" });
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+    else {
       return res.status(404).json({ message: "Location not found" });
     }
   }
@@ -171,9 +178,10 @@ exports.removePlayer = async (req, res) => {
 
 exports.playerList = async (req, res) => {
   try {
-    const players = await Player.fint();
-    return res.status(200).json(players);
+    const users = await User.find();
+    return res.status(200).json(users);
   } catch (err) {
+    console.log(err)
     return res.status(500).json({ message: err });
   }
 }
@@ -187,9 +195,13 @@ exports.addLocation = async (req, res) => {
   const showers = req.body.showers;
   const benchSpace = req.body.benchSpace;
   const vendingMachine = req.body.vendingMachine;
-  const locationID = address+courtNumber;
+  const locationName = req.body.locationName;
+  const locationID = (address + "/" + courtNumber).replace(/\s/g, '');
+  // Remove all spaces from the locationID
+  // locationID = locationID.replace(/\s/g, '');
 
   const newLocation = new Location({
+    locationName: locationName,
     locationID: locationID,
     courtNumber: courtNumber,
     address: address,

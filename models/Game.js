@@ -19,7 +19,7 @@ const gameSchema = new mongoose.Schema({
     type: Number, //HHMM
     required: true
   },
-  location: {
+  locationID: {
     type: String,
     required: true
   },
