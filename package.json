@@ -1,9 +1,9 @@
 {
   "name": "hoopsserver",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -19,5 +19,15 @@
     "node": "^19.6.1",
     "nodemon": "^2.0.20",
     "salt": "^0.5.5"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AxelrodAsaf/HoopsServer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AxelrodAsaf/HoopsServer/issues"
+  },
+  "homepage": "https://github.com/AxelrodAsaf/HoopsServer#readme",
+  "description": ""
 }
