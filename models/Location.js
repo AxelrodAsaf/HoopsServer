@@ -2,9 +2,12 @@ const mongoose = require("mongoose");
 
 // Define a way to save a certain set of fields of data
 const locationSchema = new mongoose.Schema({
+  locationName: {
+    type: String,
+    required: true
+  },
   locationID: {
     type: String,
-    required: true,
     unique: true,
   },
   address: {
