@@ -8,7 +8,7 @@ const locationSchema = new mongoose.Schema({
     unique: true,
   },
   address: {
-    type: String,
+    type: String, //STREET##
     required: true,
   },
   indoor: {

@@ -18,6 +18,7 @@ exports.signup = async (req, res) => {
   const preferredPosition = req.body.preferredPosition;
   const height = req.body.height;
   const admin = req.body.admin;
+  const playerID = phoneNumber+firstName;
 
   const newUser = new User({
     firstName: firstName,
@@ -28,6 +29,7 @@ exports.signup = async (req, res) => {
     phoneNumber: phoneNumber,
     preferredPosition: preferredPosition,
     height: height,
+    playerID: playerID,
     admin: admin
   });
 

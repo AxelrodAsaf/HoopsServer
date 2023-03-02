@@ -7,12 +7,16 @@ const gameSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  date: {
+    type: Number, //DDMMYYYY
+    required: true
+  },
   startTime: {
-    type: Number,
+    type: Number, //HHMM
     required: true
   },
   endTime: {
-    type: Number,
+    type: Number, //HHMM
     required: true
   },
   location: {

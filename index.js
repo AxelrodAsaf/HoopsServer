@@ -34,16 +34,22 @@ app.post("/login", authorization.login);
 // Using app.use make sure that the token is valid for all requests
 app.use(authorization.token);
 
+// Player section
 app.post("/addPlayer", controller.addPlayer);
 app.post("/removePlayer", controller.removePlayer);
+app.post("/playerList", controller.playerList);
 
+// Game section
 app.post("/createGame", controller.createGame);
 app.post("/approveGame", controller.approveGame);
 app.post("/rejectGame", controller.rejectGame);
 app.post("/deleteGame", controller.deleteGame);
+app.post("/gameList", controller.gameList);
 
+// Location section
 app.post("/addLocation", controller.addLocation);
 app.post("/removeLocation", controller.removeLocation);
+app.post("/locationList", controller.locationList);
 
 // Run the server on port with a console.log to tell the backend "developer"
 app.listen(port, () => {

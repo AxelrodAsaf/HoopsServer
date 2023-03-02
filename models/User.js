@@ -20,11 +20,11 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     birthDate: {
-        type: String,
+        type: String, //DDMMYYYY
         required: true,
     },
     phoneNumber: {
-        type: String,
+        type: String, //##########
         required: true,
     },
     preferredPosition: {
@@ -32,12 +32,16 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     height: {
-        type: Number,
+        type: Number, //###     (in cm)
         required: true,
     },
     admin: {
         type: Boolean,
         default: false,
+    },
+    playerID: {
+        type: String,
+        required: false
     }
 })
 
