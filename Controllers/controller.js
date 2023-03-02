@@ -3,7 +3,7 @@ const Location = require("../models/Location");
 require('dotenv').config();
 
 exports.createGame = async (req, res) => {
-  const gameID = req.body.gameID;
+  const date = req.body.date;
   const startTime = req.body.startTime;
   const endTime = req.body.endTime;
   const location = req.body.location;
@@ -15,8 +15,10 @@ exports.createGame = async (req, res) => {
   const approved = req.body.approved;
   const tlvpremium = req.body.tlvpremium;
   const price = req.body.price;
+  const gameID = startTime+location+createdByUser;
 
   const newGame = new Game({
+    date: date,
     gameID: gameID,
     startTime: startTime,
     endTime: endTime,
@@ -36,12 +38,16 @@ exports.createGame = async (req, res) => {
     return res.status(409).json({ message: "Game already exists" });
   }
   else {
-    try {
-      console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new game with email: ${newGame.gameID}`);
-      await newGame.save();
-      return res.status(200).json({ message: "Game saved successfully" });
-    } catch (err) {
-      console.error(err);
+    if (await Location.findOne({ location: location })) {
+      try {
+        console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new game with email: ${newGame.gameID}`);
+        await newGame.save();
+        return res.status(200).json({ message: "Game saved successfully" });
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      return res.status(404).json({ message: "Location not found" });
     }
   }
 };
@@ -108,6 +114,15 @@ exports.deleteGame = async (req, res) => {
   }
 }
 
+exports.gameList = async (req, res) => {
+  try {
+    const games = await Game.find();
+    return res.status(200).json(games);
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+}
+
 exports.addPlayer = async (req, res) => {
   const gameID = req.body.gameID;
   const player = req.body.player;
@@ -154,8 +169,17 @@ exports.removePlayer = async (req, res) => {
   }
 }
 
+exports.playerList = async (req, res) => {
+  try {
+    const players = await Player.fint();
+    return res.status(200).json(players);
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+}
+
 exports.addLocation = async (req, res) => {
-  const locationID = req.body.locationID;
+  const courtNumber = req.body.courtNumber;
   const address = req.body.address;
   const indoor = req.body.indoor;
   const lockerRoom = req.body.lockerRoom;
@@ -163,9 +187,11 @@ exports.addLocation = async (req, res) => {
   const showers = req.body.showers;
   const benchSpace = req.body.benchSpace;
   const vendingMachine = req.body.vendingMachine;
+  const locationID = address+courtNumber;
 
   const newLocation = new Location({
     locationID: locationID,
+    courtNumber: courtNumber,
     address: address,
     indoor: indoor,
     lockerRoom: lockerRoom,
@@ -205,5 +231,14 @@ exports.removeLocation = async (req, res) => {
     } catch (err) {
       return res.status(500).json({ message: err });
     }
+  }
+}
+
+exports.locationList = async (req, res) => {
+  try {
+    const locations = await Location.find();
+    return res.status(200).json(locations);
+  } catch (err) {
+    return res.status(500).json({ message: err });
   }
 }
