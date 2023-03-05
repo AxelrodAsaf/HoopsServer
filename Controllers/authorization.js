@@ -46,7 +46,9 @@ exports.signup = async (req, res) => {
     }
     // Check to see if there is already a user with that email
     else if (tempCheck2) {
-      return res.status(409).json({ message: "Email already in use" });
+      // send a response with error code 409
+      return res.status(409);
+      // return res.status(409).json({ message: "Email already in use" });
     }
     try {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new user with email: ${newUser.email}`);
