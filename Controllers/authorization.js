@@ -43,7 +43,7 @@ exports.signup = async (req, res) => {
         const saveRes = await newUser.save();
         // console.log(saveRes);
       } catch (err) {
-        // console.log(err);
+        console.log(err);
       }
       return res.status(200).json({ message: "User saved successfully" });
     } catch (err) {
