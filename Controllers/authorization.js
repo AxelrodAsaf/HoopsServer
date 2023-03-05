@@ -37,18 +37,15 @@ exports.signup = async (req, res) => {
     return res.status(400).json({message: "Please enter all fields"});
   }
   else {
-    // Check to see if there is already a user with that phoneNumber
     const tempCheck = await User.findOne({phoneNumber: phoneNumber});
     const tempCheck2 = await User.findOne({email: email});
+    // Check to see if there is already a user with that phoneNumber
     if (tempCheck) {
-      console.log(tempCheck);
       return res.status(408).json({ message: "Phone number already in use" });
     }
     // Check to see if there is already a user with that email
     else if (tempCheck2) {
-      // send a response with error code 409
-      return res.status(409);
-      // return res.status(409).json({ message: "Email already in use" });
+      return res.status(409).json({ message: "Email already in use" });
     }
     try {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new user with email: ${newUser.email}`);
