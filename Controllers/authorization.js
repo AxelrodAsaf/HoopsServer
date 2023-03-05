@@ -37,15 +37,27 @@ exports.signup = async (req, res) => {
     return res.status(400).json({message: "Please enter all fields"});
   }
   else {
+    // Check to see if there is already a user with that phoneNumber
+    const tempCheck = await User.findOne({phoneNumber: phoneNumber});
+    const tempCheck2 = await User.findOne({email: email});
+    if (tempCheck) {
+      console.log(tempCheck);
+      return res.status(408).json({ message: "Phone number already in use" });
+    }
+    // Check to see if there is already a user with that email
+    else if (tempCheck2) {
+      return res.status(409).json({ message: "Email already in use" });
+    }
     try {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new user with email: ${newUser.email}`);
       try {
+        // await newUser.save();
         const saveRes = await newUser.save();
         // console.log(saveRes);
+        return res.status(200).json({ message: "User saved successfully" });
       } catch (err) {
         console.log(err);
       }
-      return res.status(200).json({ message: "User saved successfully" });
     } catch (err) {
       if (err.code === 11000) { // Duplicate Key
         return res.status(409).json({ message: err });
@@ -80,7 +92,6 @@ exports.login = async (req, res) => {
         admin: user.admin
       }
       var token = jwt.sign(payload, secretKey);
-      token = `Bearer ${token}`;
       console.log('\x1b[32m%s\x1b[0m', `${email} logged in with token: ${token}`);
       res.status(200).json({
         token: token
@@ -114,7 +125,7 @@ exports.token = async (req, res, next) => {
         req.user = payload.email;
       } catch (error) {
         // Handle error
-        // console.error(error.message);
+        console.error(error.message);
       }
     }
   }
