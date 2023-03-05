@@ -18,7 +18,7 @@ exports.signup = async (req, res) => {
   const preferredPosition = req.body.preferredPosition;
   const height = req.body.height;
   const admin = req.body.admin;
-  const playerID = phoneNumber+firstName;
+  const playerID = phoneNumber + firstName;
 
   const newUser = new User({
     firstName: firstName,
@@ -35,13 +35,18 @@ exports.signup = async (req, res) => {
 
   try {
     console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new user with email: ${newUser.email}`);
-    await newUser.save((err, rs) => {
-      if (err) {
-        return res.status(500).json({ message: err });
-      } else {
-        console.log(rs);
-      }
-    });
+    try {
+      await newUser.save((err, rs) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ message: err });
+        } else {
+          console.log(rs);
+        }
+      });
+    } catch (err) {
+      console.log(err);
+    }
     return res.status(200).json({ message: "User saved successfully" });
   } catch (err) {
     if (err.code === 11000) { // Duplicate Key
