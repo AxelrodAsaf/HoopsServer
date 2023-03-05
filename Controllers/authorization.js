@@ -37,10 +37,9 @@ exports.signup = async (req, res) => {
     console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new user with email: ${newUser.email}`);
     try {
       const saveRes = await newUser.save();
-      console.log(saveRes);
-      
+      // console.log(saveRes);
     } catch (err) {
-      console.log(err);
+      // console.log(err);
     }
     return res.status(200).json({ message: "User saved successfully" });
   } catch (err) {
@@ -89,7 +88,7 @@ exports.login = async (req, res) => {
   }
   // User not found
   else {
-    console.log(`User not found`);
+    console.log(`User not found while trying to login email: ${email}`);
     return res.status(400).json({ message: "User not found." })
   }
 }
@@ -110,7 +109,7 @@ exports.token = async (req, res, next) => {
         req.user = payload.email;
       } catch (error) {
         // Handle error
-        console.error(error.message);
+        // console.error(error.message);
       }
     }
   }

@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Location = require("../models/Location");
 require('dotenv').config();
 
+// Create a new game
 exports.createGame = async (req, res) => {
   const date = req.body.date;
   const startTime = req.body.startTime;
@@ -49,7 +50,7 @@ exports.createGame = async (req, res) => {
           await newGame.save();
           return res.status(200).json({ message: "Game saved successfully" });
         } catch (err) {
-          console.error(err);
+          // console.error(err);
         }
       }
     }
@@ -59,6 +60,7 @@ exports.createGame = async (req, res) => {
   }
 };
 
+// Approve a game (admin)
 exports.approveGame = async (req, res) => {
   const gameID = req.body.gameID;
   const game = await Game.findOne({ gameID: gameID });
@@ -81,6 +83,7 @@ exports.approveGame = async (req, res) => {
   }
 }
 
+// Reject a game (admin)
 exports.rejectGame = async (req, res) => {
   const gameID = req.body.gameID;
   const game = await Game.findOne({ gameID: gameID });
@@ -103,6 +106,7 @@ exports.rejectGame = async (req, res) => {
   }
 }
 
+// Delete a game (admin)
 exports.deleteGame = async (req, res) => {
   const gameID = req.body.gameID;
   const game = await Game.findOne({ gameID: gameID });
@@ -121,6 +125,7 @@ exports.deleteGame = async (req, res) => {
   }
 }
 
+// Get all games
 exports.gameList = async (req, res) => {
   try {
     const games = await Game.find();
@@ -130,6 +135,7 @@ exports.gameList = async (req, res) => {
   }
 }
 
+// Add a player to a game
 exports.addPlayer = async (req, res) => {
   const gameID = req.body.gameID;
   const player = req.body.player;
@@ -153,6 +159,7 @@ exports.addPlayer = async (req, res) => {
   }
 }
 
+// Remove a player from a game
 exports.removePlayer = async (req, res) => {
   const gameID = req.body.gameID;
   const player = req.body.player;
@@ -176,16 +183,18 @@ exports.removePlayer = async (req, res) => {
   }
 }
 
+// Get all the players in a list (admin)
 exports.playerList = async (req, res) => {
   try {
     const users = await User.find();
     return res.status(200).json(users);
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     return res.status(500).json({ message: err });
   }
 }
 
+// Add a location (admin)
 exports.addLocation = async (req, res) => {
   const courtNumber = req.body.courtNumber;
   const address = req.body.address;
@@ -223,11 +232,12 @@ exports.addLocation = async (req, res) => {
       await newLocation.save();
       return res.status(200).json({ message: "Location saved successfully" });
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     }
   }
 }
 
+// Remove a location (admin)
 exports.removeLocation = async (req, res) => {
   const locationID = req.body.locationID;
   const location = await Location.findOne({ locationID: locationID });
@@ -246,6 +256,7 @@ exports.removeLocation = async (req, res) => {
   }
 }
 
+// Get all locations in a list (admin)
 exports.locationList = async (req, res) => {
   try {
     const locations = await Location.find();

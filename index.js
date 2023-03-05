@@ -17,7 +17,7 @@ mongoose.connect(mongooseURL, {})
     console.log('\x1b[32m%s\x1b[0m', `+----------------------------+`);
   })
   .catch(error => {
-    console.log("There was an error.");
+    console.log("There was an error connecting to mongodb.");
     console.log(error);
   })
 
