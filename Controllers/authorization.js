@@ -10,13 +10,13 @@ const secretKey = process.env.JWT_SECRET_KEY;
 exports.signup = async (req, res) => {
   const salt = bcrypt.genSaltSync(10);
   const hash = bcrypt.hashSync(req.body.password, salt);
-  const firstName = req.body.firstName;
-  const lastName = req.body.lastName;
-  const email = req.body.email;
-  const birthDate = req.body.birthDate;
-  const phoneNumber = req.body.phoneNumber;
-  const preferredPosition = req.body.preferredPosition;
-  const height = req.body.height;
+  const firstName = req.body.firstName? req.body.firstName : "";
+  const lastName = req.body.lastName? req.body.lastName : "";
+  const email = req.body.email? req.body.email : "";
+  const birthDate = req.body.birthDate? req.body.birthDate : "";
+  const phoneNumber = req.body.phoneNumber? req.body.phoneNumber : "";
+  const preferredPosition = req.body.preferredPosition? req.body.preferredPosition : "";
+  const height = req.body.height? req.body.height : "";
   const admin = req.body.admin;
   const playerID = phoneNumber + firstName;
 
@@ -33,23 +33,25 @@ exports.signup = async (req, res) => {
     admin: admin
   });
 
-  if (firstName === "" || lastName === "" || email === "" || birthDate === "" || phoneNumber === "" || preferredPosition === "" || height === "") {
-    return res.status(400).json({ message: "Please fill in all fields" });
+  if (!firstName ||!lastName ||!email ||!birthDate ||!phoneNumber ||!preferredPosition ||!height) {
+    return res.status(400).json({message: "Please enter all fields"});
   }
-  try {
-    console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new user with email: ${newUser.email}`);
+  else {
     try {
-      const saveRes = await newUser.save();
-      // console.log(saveRes);
+      console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new user with email: ${newUser.email}`);
+      try {
+        const saveRes = await newUser.save();
+        // console.log(saveRes);
+      } catch (err) {
+        // console.log(err);
+      }
+      return res.status(200).json({ message: "User saved successfully" });
     } catch (err) {
-      // console.log(err);
-    }
-    return res.status(200).json({ message: "User saved successfully" });
-  } catch (err) {
-    if (err.code === 11000) { // Duplicate Key
-      return res.status(409).json({ message: err });
-    } else { // Different error
-      return res.status(500).json({ message: err });
+      if (err.code === 11000) { // Duplicate Key
+        return res.status(409).json({ message: err });
+      } else { // Different error
+        return res.status(500).json({ message: err });
+      }
     }
   }
 };
