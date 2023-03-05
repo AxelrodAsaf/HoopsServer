@@ -36,14 +36,8 @@ exports.signup = async (req, res) => {
   try {
     console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new user with email: ${newUser.email}`);
     try {
-      await newUser.save((err, rs) => {
-        if (err) {
-          console.log(err);
-          return res.status(500).json({ message: err });
-        } else {
-          console.log(rs);
-        }
-      });
+      const saveRes = await newUser.save();
+      console.log(saveRes);
     } catch (err) {
       console.log(err);
     }
