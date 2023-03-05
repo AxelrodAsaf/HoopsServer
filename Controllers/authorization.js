@@ -38,6 +38,7 @@ exports.signup = async (req, res) => {
     try {
       const saveRes = await newUser.save();
       console.log(saveRes);
+      
     } catch (err) {
       console.log(err);
     }
