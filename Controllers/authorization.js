@@ -33,6 +33,9 @@ exports.signup = async (req, res) => {
     admin: admin
   });
 
+  if (firstName === "" || lastName === "" || email === "" || birthDate === "" || phoneNumber === "" || preferredPosition === "" || height === "") {
+    return res.status(400).json({ message: "Please fill in all fields" });
+  }
   try {
     console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new user with email: ${newUser.email}`);
     try {
