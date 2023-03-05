@@ -10,32 +10,20 @@ const secretKey = process.env.JWT_SECRET_KEY;
 exports.signup = async (req, res) => {
   const salt = bcrypt.genSaltSync(10);
   const hash = bcrypt.hashSync(req.body.password, salt);
-  const firstName = req.body.firstName;
-  const lastName = req.body.lastName;
-  const email = req.body.email;
-  const birthDate = req.body.birthDate;
-  const phoneNumber = req.body.phoneNumber;
-  const preferredPosition = req.body.preferredPosition;
-  const height = req.body.height;
-  const admin = req.body.admin;
-  const playerID = phoneNumber+firstName;
+  const { firstName, lastName, email, birthDate, phoneNumber, preferredPosition, height, admin } = req.body;
+  const playerID = phoneNumber + firstName;
 
-  const newUser = new User({
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    password: hash,
-    birthDate: birthDate,
-    phoneNumber: phoneNumber,
-    preferredPosition: preferredPosition,
-    height: height,
-    playerID: playerID,
-    admin: admin
-  });
+  const newUser = new User({ firstName, lastName, email, password, birthDate, phoneNumber, preferredPosition, height, playerID, admin });
 
   try {
     console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new user with email: ${newUser.email}`);
-    await newUser.save();
+    await newUser.save((err, rs) => {
+      if (err) {
+        return res.status(500).json({ message: err });
+      } else {
+        console.log(rs);
+      }
+    });
     return res.status(200).json({ message: "User saved successfully" });
   } catch (err) {
     if (err.code === 11000) { // Duplicate Key
