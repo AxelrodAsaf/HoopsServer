@@ -43,7 +43,7 @@ app.post("/playerList", controller.playerList);
 app.post("/createGame", controller.createGame);
 app.post("/approveGame", controller.approveGame);
 app.post("/rejectGame", controller.rejectGame);
-app.post("/deleteGame", controller.deleteGame);
+app.post("/removeGame", controller.removeGame);
 app.post("/gameList", controller.gameList);
 
 // Location section
