@@ -8,15 +8,18 @@ exports.createGame = async (req, res) => {
   const date = req.body.date;
   const startTime = req.body.startTime;
   const endTime = req.body.endTime;
-  const participants = req.body.participants;
-  const createdByUser = req.body.createdByUser;
   const ageMin = req.body.ageMin;
   const ageMax = req.body.ageMax;
   const level = req.body.level;
-  const approved = req.body.approved;
+  const maximumPlayers = req.body.maximumPlayers;
+
   const tlvpremium = req.body.tlvpremium;
   const price = req.body.price;
+  const createdByUser = req.body.createdByUser;
   const locationID = req.body.locationID;
+
+  const approved = req.body.approved;
+  const participants = req.body.participants;
   const gameID = date + "/" + startTime + "/" + locationID;
 
   const newGame = new Game({
@@ -26,6 +29,7 @@ exports.createGame = async (req, res) => {
     startTime: startTime,
     endTime: endTime,
     participants: participants,
+    maximumPlayers: maximumPlayers,
     createdByUser: createdByUser,
     ageMin: ageMin,
     ageMax: ageMax,
@@ -50,7 +54,7 @@ exports.createGame = async (req, res) => {
           await newGame.save();
           return res.status(200).json({ message: "Game saved successfully" });
         } catch (err) {
-          // console.error(err);
+          return res.status(500).json({ message: err });
         }
       }
     }
@@ -107,9 +111,10 @@ exports.rejectGame = async (req, res) => {
 }
 
 // Delete a game (admin)
-exports.deleteGame = async (req, res) => {
+exports.removeGame = async (req, res) => {
   const gameID = req.body.gameID;
   const game = await Game.findOne({ gameID: gameID });
+  console.log(gameID, game)
 
   if (!game) {
     return res.status(404).json({ message: "Game does not exist" });
@@ -128,7 +133,7 @@ exports.deleteGame = async (req, res) => {
 // Get all games
 exports.gameList = async (req, res) => {
   try {
-    const games = await Game.find();
+    const games = await Game.find().populate("participants");
     return res.status(200).json(games);
   } catch (err) {
     return res.status(500).json({ message: err });
@@ -233,6 +238,7 @@ exports.addLocation = async (req, res) => {
       return res.status(200).json({ message: "Location saved successfully" });
     } catch (err) {
       // console.error(err);
+      return res.status(400).json({ message: err });
     }
   }
 }
