@@ -1,21 +1,32 @@
 TLV Hoops - Server Documentation
 By Asaf Axelrod
 
-For simplicity all requests should be
+Simplicity rules for requests:
   1. POST requests
   2. Relevant content in the request’s body
   3. Relevant content in an object format
 
++====================================================================================================+
+
+Making a request:
 Sign-up (./Controllers/authorization.js)
   Make a request to "/signup" with keys:
-    firstName, lastName, email, birthDate, phoneNumber, preferredPosition, and Height;
-  If successful - status200 with message.
+    firstName, lastName, password, email (lowercase), birthDate, phoneNumber, preferredPosition, and height:
+      firstName = String format: "First"
+      lastName = String format: "Last"
+      password = String format: "pAsSwOrD"
+      email (lowercase) = String format: "example@example.com" AND NOT "Example@example.com"
+      birthDate = String format of DDMMYYYY: "31122023" as 31st of December, 2023
+      phoneNumber = String format: "0531111111" AND NOT NUMBER FORMAT
+      preferredPosition = String format: "Center"
+      height = Number format in cm: 200 for 200cm, 175 for 1.75m
+  If successful - status 200 with message.
   If error - error message
 
 Login (./Controllers/authorization.js)
   Make a request to "/login" with keys:
     lowerLoginEmail, loginPass;
-      lowerLoginEmail = (this is the user’s email made lowercase: example@mail.com and NOT: Example@mail.com)
+      lowerLoginEmail = This is the user’s email made lowercase: example@mail.com and NOT: Example@mail.com
       loginPass = This is the user’s input password - it will be checked with the encryption to see if it matches.
   Login will return status 200 with token if login was correct
   Login will return error if user is not found
@@ -25,8 +36,8 @@ Player (./Controllers/controller.js)
   Add a player to a specific game:
     Make a request to "/addPlayer" with keys:
       gameID, player;
-        gameID = in string format
-        player = in string format
+        gameID = String format of the generated id: "30122023/1200/HaHilazon3/1"
+        player = String format of the player's "_id": "6407303ff97c9af6908db47a"
     Will return status 200 if player was added successfully
     Will return status 404 if game is not found
     Will return status 409 if player is already in the game
@@ -34,8 +45,8 @@ Player (./Controllers/controller.js)
   Remove a player from a specific game:
     Make a request to "/removePlayer" with keys:
       gameID, player;
-        gameID = in string format
-        player = in string format
+        gameID = String format of the generated id: "30122023/1200/HaHilazon3/1"
+        player = String format of the player's "_id": "6407303ff97c9af6908db47a"
     Will return status 200 if player was removed successfully
     Will return status 404 if game is not found
     Will return status 409 if player is not in game
@@ -44,23 +55,24 @@ Player (./Controllers/controller.js)
 Game (./Controllers/controller.js)
   Create a game:
     Make a request to "/createGame" with keys:
-      gameID, startTime, endTime, location, createdByUser, ageMin, ageMax, level, tlvpremium, price;
-        gameID = this will be a combination of the game's creator, location, startTime
-        startTime = in number format
-        endTime = in number format
-        location = in string format
-        createdByUser = in string format
-        ageMin = in number format
-        ageMax = in number format
-        level = in string format
-        tlvpremium = in boolean format
-        price = in number format
-    Will return status 409 with message "Game already exists" if game exists already
+      date, startTime, endTime, ageMin, ageMax, level, maximumPlayers, tlvpremium, price, locationID, createdByUser;
+        date = Number format DDMMYYYY: 31122023 as in 31st of December, 2023
+        startTime = Number and 24hr format: 1530 for 3:30pm
+        endTime = Number and 24hr format: 1600 for 4:00pm
+        ageMin = Number format
+        ageMax = Number format
+        level = String format
+        maximumPlayers = Number format- minimum of 4, maximum of 20, default of 10.
+        tlvpremium = Boolean format
+        price = Number format: 50 for 50nis
+        locationID = String format: "HaHilazon3/1" for Address # and court#
+        createdByUser = String format: "0532211390Asaf" for the user with playerID phoneNumber+firstName
     Will return status 200 with message "Game saved successfully" if game is saved successfully
+    Will return status 409 with message "Game already exists" if game exists already
   Approve a game:
     Make a request to "/approveGame" with keys:
       gameID;
-        gameID = this will be a combination of the game's creator, location, startTime
+        gameID = String format: "31122023/300/HaHilazon3/1" as in 31st of December, 3:00am, with locationID HaHilazon3/1
     Will return status 200 with message "Game approved successfully" if game is approved
     Will return status 404 if the game does not exist
     Will return status 409 if the game is already approved
@@ -68,15 +80,15 @@ Game (./Controllers/controller.js)
   Reject a game:
     Make a request to "/rejectGame" with keys:
       gameID;
-        gameID = this will be a combination of the game's creator, location, startTime
+        gameID = String format: "31122023/300/HaHilazon3/1" as in 31st of December, 3:00am, with locationID HaHilazon3/1
     Will return status 200 with message "Game rejected successfully" if game is rejected
     Will return status 404 if the game does not exist
     Will return status 409 if the game is already rejected
     Will return status 500 for other errors
-  Delete a game:
-    Make a request to "/deleteGame" with keys:
+  Remove a game:
+    Make a request to "/removeGame" with keys:
       gameID;
-        gameID = this will be a combination of the game's creator, location, startTime
+        gameID = String format: "31122023/300/HaHilazon3/1" as in 31st of December, 3:00am, with locationID HaHilazon3/1
     Will return status 200 with message "Game deleted successfully" if game is deleted
     Will return status 404 if the game does not exist
     Will return status 500 for other errors
@@ -84,97 +96,25 @@ Game (./Controllers/controller.js)
 Location (./Controllers/controller.js)
   Add a location:
     Make a request to "/addLocation" with keys:
-      locationID, address, indoor, lockerRoom, bathroom, showers, benchSpace, vendingMachine;
-        locationID = in string format
-        address = in string format
-        indoor = in boolean format
-        lockerRoom = in boolean format
-        bathroom = in boolean format
-        showers = in boolean format
-        benchSpace = in number format
-        vendingMachine = in boolean format
+      courtNumber, address, indoor, lockerRoom, bathroom, showers, benchSpace, vendingMachine, locationName;
+        courtNumber = Number format: 5 as in court 5
+        address = String format - Street_#: "HaHilazon 3"
+        indoor = Boolean format
+        lockerRoom = Boolean format
+        bathroom = Boolean format
+        showers = Boolean format
+        benchSpace = Number format: 10 as in 10 spaces to sit comfortably
+        vendingMachine = Boolean format
+        locationName = String format: "Sporteck"
     Will return status 200 with message "Location saved successfully" if location is saved
     Will return status 409 with message "Location already exists" if location already exists
     Will console.log error if another error is encountered
   Remove a location:
     Make a request to "/removeLocation" with keys:
       locationID;
-        locationID = in string format
+        locationID = String format: "HaHilazon3/1" as in HaHilazon 3, court 1
     Will return status 200 with message "Location deleted successfully" if location is removed
     Will return status 404 if the location does not exist
     Will return status 500 for other errors
 
 +====================================================================================================+
-Schemas and their associated data structures:
-  Player:
-    gameID
-      Made up of startTime, location, createdByUser
-        "0103231930gymAsaf" = 01.03.2023, gym, Asaf
-    player
-      Made up of player's phoneNumber, firstName
-        "0532211390Asaf" = 0532211390, Asaf
-
-  Location:
-    locationID
-      Made up of address, court number
-        "BenGurion531" = Ben Gurion 53, 1
-    address
-      Made up of address
-        "BenGurion53" = Ben Gurion 53
-    indoor
-      Made up of boolean value
-        indoor = true
-        outdoor = false
-    lockerRoom
-      Made up of boolean value
-        locker room = true
-        no locker room = false
-    bathroom
-      Made up of boolean value
-        bathroom = true
-        no bathroom = false
-    showers
-      Made up of boolean value
-        showers = true
-        no showers = false
-    benchSpace
-      Made up of a number to describe seating spaces
-        15 = 15 seats for players waiting to join games/friends watching the game
-    vendingMachine
-      Made up of a boolean value
-        vending machine = true
-        no vending machine = false
-
-  Game:
-    gameID
-      Made up of startTime, location, createdByUser
-        "0103231930gymAsaf" = 01.03.2023, gym, Asaf
-    startTime
-      Made up of date and time
-        "0103231930" = 01.03.2023 at time 19:30
-    endTime
-      Made up of date and time
-        "0103232130" = 01.03.2023 at time 21:30
-    location
-      Made up of the locationID
-        Made up of address, court number
-        "BenGurion531" = Ben Gurion 53, 1
-    createdByUser
-      Made up of the player's phoneNumber, firstName
-        "0532211390Asaf" = 0532211390, Asaf
-    ageMin
-      Made up of a number
-        "50" = minimum age of players to join a game
-    ageMax
-      Made up of a number
-        "90" = maximum age of players to join a game
-    level
-      Made up of a string to state skill level
-        "Professional" = recommended level of a player to join a game
-    tlvpremium
-      Made up of a boolean to state if the game is premium
-        tlvpremium = true (paid game, made by staff with scheduling of arena/courts)
-        not tlvpremium = false (free game, can be scheduled by any player that is signed in)
-    price
-      Made up of a number to state the price of the game if it's tlvpremium
-        55 = price is 55NIS to join the game that is scheduled by staff members
