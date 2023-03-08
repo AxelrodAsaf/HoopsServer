@@ -6,8 +6,14 @@ const locationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  courtNumber: {
+    type: Number,
+    required: true,
+    default: 1,
+  },
   locationID: {
     type: String,
+    required: true,
     unique: true,
   },
   address: {
