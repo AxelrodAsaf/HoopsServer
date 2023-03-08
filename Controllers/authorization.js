@@ -67,9 +67,9 @@ exports.signup = async (req, res) => {
   }
 };
 
-
 // Define and export the function 'login'
 exports.login = async (req, res) => {
+  console.log("Trying to login");
   email = req.body.lowerLoginEmail;
   cleanPassword = req.body.loginPass;
 
@@ -111,7 +111,7 @@ exports.login = async (req, res) => {
 // When the client makes any request to the server (other than login/signup), check if the token is valid
 exports.token = async (req, res, next) => {
   if (req.headers.authorization !== undefined) {
-    [, token] = req.headers.authorization.split(' ');
+    token = req.headers.authorization
     // Verify token
     if (token !== undefined) {
       var payload = '';
