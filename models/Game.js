@@ -23,10 +23,16 @@ const gameSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  participants: {
-    type: Array,
-    required: false,
-    default: []
+  participants: [{
+    type: mongoose.Schema.Types.ObjectId, ref: 'User',
+    default: [],
+    required: true
+  }],
+  maximumPlayers: {
+    type: Number,
+    default: 10,
+    min: 4,
+    max: 20
   },
   createdByUser: {
     type: String,
