@@ -37,10 +37,11 @@ app.use(authorization.token);
 // Player section
 app.post("/addPlayer", controller.addPlayer);
 app.post("/removePlayer", controller.removePlayer);
+app.post("/removeFromGame", controller.removeFromGame);
 app.post("/playerList", controller.playerList);
 
 // Game section
-app.post("/createGame", controller.createGame);
+app.post("/addGame", controller.addGame);
 app.post("/approveGame", controller.approveGame);
 app.post("/rejectGame", controller.rejectGame);
 app.post("/removeGame", controller.removeGame);

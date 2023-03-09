@@ -4,7 +4,8 @@ const Location = require("../models/Location");
 require('dotenv').config();
 
 // Create a new game
-exports.createGame = async (req, res) => {
+exports.addGame = async (req, res) => {
+  console.log(req.body)
   const date = req.body.date;
   const startTime = req.body.startTime;
   const endTime = req.body.endTime;
@@ -39,16 +40,14 @@ exports.createGame = async (req, res) => {
     price: price
   });
 
+  console.log(newGame);
+
   // Find in the database if the game already exists, if not create it
   if (await Game.findOne({ gameID: gameID })) {
     return res.status(409).json({ message: "Game already exists" });
   }
   else {
     if (await Location.findOne({ locationID: locationID })) {
-      if (await Game.findOne({ gameID: gameID })) {
-        return res.status(409).json({ message: "Game already exists" });
-      }
-      else {
         try {
           console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new game created by ${createdByUser}`);
           await newGame.save();
@@ -56,9 +55,9 @@ exports.createGame = async (req, res) => {
         } catch (err) {
           return res.status(500).json({ message: err });
         }
-      }
     }
     else {
+      console.log(`Location ${locationID} does not exist`);
       return res.status(404).json({ message: "Location not found" });
     }
   }
@@ -164,8 +163,25 @@ exports.addPlayer = async (req, res) => {
   }
 }
 
-// Remove a player from a game
+// Delete a player from the database
 exports.removePlayer = async (req, res) => {
+  try {
+    // Find the player with the playerID within the database and delete it
+    const player = await User.deleteOne({ playerID: req.body.playerID });
+    if (!player.deletedCount) {
+      return res.status(404).json({ message: "Player does not exist" });
+    }
+    else {
+      return res.status(200).json({ message: "Player deleted successfully" });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
+
+// Remove a player from a game
+exports.removeFromGame = async (req, res) => {
   const gameID = req.body.gameID;
   const player = req.body.player;
   const game = await Game.findOne({ gameID: gameID });
