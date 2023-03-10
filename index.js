@@ -60,11 +60,11 @@ app.listen(port, () => {
 
 
 // ++++++++++++++++++ Console.log() commands to change colors of the output: ++++++++++++++++++
-// console.log('\x1b[31m%s\x1b[0m', 'This text is red.');
-// console.log('\x1b[32m%s\x1b[0m', 'This text is green.');
-// console.log('\x1b[33m%s\x1b[0m', 'This text is yellow.');
-// console.log('\x1b[34m%s\x1b[0m', 'This text is blue.');
-// console.log('\x1b[35m%s\x1b[0m', 'This text is magenta.');
-// console.log('\x1b[36m%s\x1b[0m', 'This text is cyan.');
-// console.log('\x1b[37m%s\x1b[0m', 'This text is white.');
+// console.log('\x1b[31m%s\x1b[0m', 'This text is red.');                                    //
+// console.log('\x1b[32m%s\x1b[0m', 'This text is green.');                                  //
+// console.log('\x1b[33m%s\x1b[0m', 'This text is yellow.');                                 //
+// console.log('\x1b[34m%s\x1b[0m', 'This text is blue.');                                   //
+// console.log('\x1b[35m%s\x1b[0m', 'This text is magenta.');                                //
+// console.log('\x1b[36m%s\x1b[0m', 'This text is cyan.');                                   //
+// console.log('\x1b[37m%s\x1b[0m', 'This text is white.');                                  //
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

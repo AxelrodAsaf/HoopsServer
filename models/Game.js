@@ -36,7 +36,7 @@ const gameSchema = new mongoose.Schema({
   },
   createdByUser: {
     type: String,
-    required: true
+    default: "ADMIN PAGE"
   },
   ageMin: {
     type: Number,

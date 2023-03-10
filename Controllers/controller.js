@@ -14,13 +14,13 @@ exports.addGame = async (req, res) => {
   const level = req.body.level;
   const maximumPlayers = req.body.maximumPlayers;
 
-  const tlvpremium = req.body.tlvpremium;
+  const tlvpremium = true;
   const price = req.body.price;
   const createdByUser = req.body.createdByUser;
   const locationID = req.body.locationID;
 
-  const approved = req.body.approved;
-  const participants = req.body.participants;
+  const approved = true;
+  const participants = [];
   const gameID = date + "/" + startTime + "/" + locationID;
 
   const newGame = new Game({
@@ -53,6 +53,7 @@ exports.addGame = async (req, res) => {
           await newGame.save();
           return res.status(200).json({ message: "Game saved successfully" });
         } catch (err) {
+          console.log(err)
           return res.status(500).json({ message: err });
         }
     }
@@ -225,10 +226,8 @@ exports.addLocation = async (req, res) => {
   const showers = req.body.showers;
   const benchSpace = req.body.benchSpace;
   const vendingMachine = req.body.vendingMachine;
-  const locationName = req.body.locationName;
+  const locationName = (address + " " + courtNumber);
   const locationID = (address + "/" + courtNumber).replace(/\s/g, '');
-  // Remove all spaces from the locationID
-  // locationID = locationID.replace(/\s/g, '');
 
   const newLocation = new Location({
     locationName: locationName,
@@ -253,7 +252,7 @@ exports.addLocation = async (req, res) => {
       await newLocation.save();
       return res.status(200).json({ message: "Location saved successfully" });
     } catch (err) {
-      // console.error(err);
+      console.error(err);
       return res.status(400).json({ message: err });
     }
   }
