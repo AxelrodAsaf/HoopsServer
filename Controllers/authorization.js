@@ -93,7 +93,8 @@ exports.login = async (req, res) => {
       var token = jwt.sign(payload, secretKey);
       console.log('\x1b[32m%s\x1b[0m', `${email} logged in with token: ${token}`);
       res.status(200).json({
-        token: token
+        token: token,
+        admin: user.admin
       });
     }
     // Password is incorrect
@@ -129,7 +130,7 @@ exports.token = async (req, res, next) => {
     }
   }
   else {
-    console.log('\x1b[31m%s\x1b[0m', `No token verified for the request`);
+    return console.log('\x1b[31m%s\x1b[0m', `No token verified for the request`);
   }
   // Continue to the next handler (with or without the user's email)
   next();
