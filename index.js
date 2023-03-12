@@ -35,7 +35,11 @@ app.post("/login", authorization.login);
 app.use(authorization.token);
 
 // Player section
+app.post("/approveRequest", controller.approveRequest);
+app.post("/sendRequest", controller.sendRequest);
+app.post("/rejectRequest", controller.rejectRequest);
 app.post("/addPlayer", controller.addPlayer);
+app.post("/editPlayer", controller.editPlayer);
 app.post("/removePlayer", controller.removePlayer);
 app.post("/removeFromGame", controller.removeFromGame);
 app.post("/playerList", controller.playerList);
@@ -46,11 +50,6 @@ app.post("/approveGame", controller.approveGame);
 app.post("/rejectGame", controller.rejectGame);
 app.post("/removeGame", controller.removeGame);
 app.post("/gameList", controller.gameList);
-
-// Location section
-app.post("/addLocation", controller.addLocation);
-app.post("/removeLocation", controller.removeLocation);
-app.post("/locationList", controller.locationList);
 
 // Run the server on port with a console.log to tell the backend "developer"
 app.listen(port, () => {

@@ -1,42 +1,43 @@
 const mongoose = require("mongoose");
 
-// Define a way to save a certain set of fields of data
 const gameSchema = new mongoose.Schema({
   gameID: {
     type: String,
     required: true,
     unique: true
   },
-  date: {
-    type: Number, //DDMMYYYY
-    required: true
-  },
-  startTime: {
-    type: Number, //HHMM
-    required: true
-  },
-  endTime: {
-    type: Number, //HHMM
-    required: true
-  },
-  locationID: {
+  courtName: {
     type: String,
     required: true
   },
-  participants: [{
-    type: mongoose.Schema.Types.ObjectId, ref: 'User',
-    default: [],
+  address: {
+    type: String,
     required: true
-  }],
+  },
+  date: {
+    type: String, //DDMMYYYY
+    required: true
+  },
+  startTime: {
+    type: String, //HHMM
+    required: true
+  },
+  endTime: {
+    type: String, //HHMM
+    required: true
+  },
   maximumPlayers: {
     type: Number,
     default: 10,
     min: 4,
     max: 20
   },
+  participants: {
+    type: Array,
+    default: []
+  },
   createdByUser: {
-    type: String,
-    default: "ADMIN PAGE"
+    type: String
   },
   ageMin: {
     type: Number,
@@ -52,20 +53,21 @@ const gameSchema = new mongoose.Schema({
   },
   approved: {
     type: Boolean,
-    required: true,
     default: false
   },
   tlvpremium: {
     type: Boolean,
-    required: true,
     default: false
   },
   price: {
     type: Number,
     required: true
   }
+});
 
-})
+// This defines the maximum amount of players in a game as the maximumPlayers value
+gameSchema.path('participants').validate(function (participants) {
+  return participants.length <= this.maximumPlayers;
+}, 'Too many participants');
 
-// Export the schema
 module.exports = mongoose.model("Game", gameSchema)

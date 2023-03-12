@@ -1,30 +1,29 @@
 const Game = require("../models/Game");
 const User = require("../models/User");
-const Location = require("../models/Location");
 require('dotenv').config();
 
 // Create a new game
 exports.addGame = async (req, res) => {
   console.log(req.body)
+  const courtName = req.body.courtName;
+  const address = req.body.address;
   const date = req.body.date;
   const startTime = req.body.startTime;
   const endTime = req.body.endTime;
   const ageMin = req.body.ageMin;
+  const maximumPlayers = req.body.maximumPlayers;
   const ageMax = req.body.ageMax;
   const level = req.body.level;
-  const maximumPlayers = req.body.maximumPlayers;
-
-  const tlvpremium = true;
+  const tlvpremium = req.body.tlvpremium;
   const price = req.body.price;
   const createdByUser = req.body.createdByUser;
-  const locationID = req.body.locationID;
-
-  const approved = true;
-  const participants = [];
-  const gameID = date + "/" + startTime + "/" + locationID;
+  const approved = req.body.approved;
+  const participants = [createdByUser];
+  const gameID = date + "/" + startTime + "/" + address;
 
   const newGame = new Game({
-    locationID: locationID,
+    courtName: courtName,
+    address: address,
     date: date,
     gameID: gameID,
     startTime: startTime,
@@ -47,7 +46,6 @@ exports.addGame = async (req, res) => {
     return res.status(409).json({ message: "Game already exists" });
   }
   else {
-    if (await Location.findOne({ locationID: locationID })) {
         try {
           console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new game created by ${createdByUser}`);
           await newGame.save();
@@ -56,11 +54,6 @@ exports.addGame = async (req, res) => {
           console.log(err)
           return res.status(500).json({ message: err });
         }
-    }
-    else {
-      console.log(`Location ${locationID} does not exist`);
-      return res.status(404).json({ message: "Location not found" });
-    }
   }
 };
 
@@ -140,6 +133,112 @@ exports.gameList = async (req, res) => {
   }
 }
 
+// Approve a request to join a game
+exports.approveRequest = async (req, res) => {
+  try {
+    const gameID = req.body.gameID;
+    const player = req.body.player;
+
+    // Check that the gameID and player fields are present in the request body
+    if (!gameID || !player) {
+      return res.status(400).json({ message: "Missing gameID or player field in request body" });
+    }
+
+    // Find the game and user
+    const game = await Game.findOne({ gameID });
+    const user = await User.findOne({ email: player });
+    if (!game || !user) {
+      return res.status(404).json({ message: "Game or player does not exist" });
+    }
+
+    // Find the request in the user's requests array
+    const request = user.requests.find(request => request.gameID === gameID);
+    if (!request) {
+      return res.status(404).json({ message: "Request does not exist" });
+    }
+
+    // Check if the player is already in the game
+    if (game.participants.includes(player)) {
+      // Remove the request from the user's request list
+      user.requests = user.requests.filter(request => request.gameID !== gameID);
+
+      // Update the user object in the database
+      await User.updateOne({ email: player }, { requests: user.requests });
+
+      return res.status(200).json({ message: "Player already in game" });
+    }
+
+    // Add the player to the game's participant list
+    game.participants.push(player);
+
+    // Remove the request from the user's request list
+    user.requests = user.requests.filter(request => request.gameID !== gameID);
+
+    // Update the game and user objects in the database
+    await Promise.all([game.save(), User.updateOne({ email: player }, { requests: user.requests })]);
+
+    return res.status(200).json({ message: "Player added to game" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Send a request to a player
+exports.sendRequest = async (req, res) => {
+  try {
+    const gameID = req.body.gameID;
+    const player = req.body.player;
+    const game = await Game.findOne({ gameID: gameID });
+    const user = await User.findOne({ email: player }).lean();
+
+    if (!game) {
+      return res.status(404).json({ message: "Game does not exist" });
+    } else if (game.participants.includes(player)) {
+      return res.status(409).json({ message: "Player already in game" });
+    } else if (!user) {
+      return res.status(404).json({ message: "User does not exist" });
+    } else {
+      console.log('Adding request to user:', user);
+      user.requests.push({ gameID: gameID, approved: false });
+      console.log('Saving user to database:', user);
+      await User.updateOne({ email: player }, { $set: { requests: user.requests } });
+      console.log('Request sent successfully');
+      return res.status(200).json({ message: "Request sent successfully" });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: err });
+  }
+};
+
+// Reject a request to join a game
+exports.rejectRequest = async (req, res) => {
+  try {
+    const gameID = req.body.gameID;
+    const player = req.body.player;
+    const game = await Game.findOne({ gameID: gameID });
+    const user = await User.findOne({ email: player });
+
+    if (!game) {
+      return res.status(404).json({ message: "Game does not exist" });
+    }
+    else if (!user) {
+      return res.status(404).json({ message: "User does not exist" });
+    }
+    else {
+      // Remove the request from the player's request list
+      user.requests = user.requests.filter(request => request.gameID!== gameID);
+      await user.save();
+      return res.status(200).json({ message: "Request rejected successfully" });
+    }
+  }
+  catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: err });
+  }
+}
+
 // Add a player to a game
 exports.addPlayer = async (req, res) => {
   const gameID = req.body.gameID;
@@ -164,7 +263,48 @@ exports.addPlayer = async (req, res) => {
   }
 }
 
-// Delete a player from the database
+// Edit a player's information
+exports.editPlayer = async (req, res) => {
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const email = req.body.email;
+  const birthDate = req.body.birthDate;
+  const phoneNumber = req.body.phoneNumber;
+  const preferredPosition = req.body.preferredPosition;
+  const height = req.body.height;
+  const admin = req.body.admin;
+
+  if (!firstName || !lastName || !email || !birthDate || !phoneNumber || !preferredPosition || !height) {
+    return res.status(400).json({ message: "Please enter all fields" });
+  }
+
+  try {
+    const existingUser = await User.findOne({ phoneNumber: phoneNumber });
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    existingUser.firstName = firstName;
+    existingUser.lastName = lastName;
+    existingUser.email = email;
+    existingUser.birthDate = birthDate;
+    existingUser.preferredPosition = preferredPosition;
+    existingUser.height = height;
+    existingUser.admin = admin;
+
+    const savedUser = await existingUser.save();
+    console.log('\x1b[37m%s\x1b[0m', `Attempting to update user with email: ${savedUser.email}`);
+    return res.status(200).json({ message: "User updated successfully" });
+  } catch (err) {
+    if (err.code === 11000) { // Duplicate Key
+      return res.status(409).json({ message: err });
+    } else { // Different error
+      return res.status(500).json({ message: err });
+    }
+  }
+};
+
+// Delete a player from the database (admin)
 exports.removePlayer = async (req, res) => {
   try {
     // Find the player with the playerID within the database and delete it
@@ -216,73 +356,4 @@ exports.playerList = async (req, res) => {
   }
 }
 
-// Add a location (admin)
-exports.addLocation = async (req, res) => {
-  const courtNumber = req.body.courtNumber;
-  const address = req.body.address;
-  const indoor = req.body.indoor;
-  const lockerRoom = req.body.lockerRoom;
-  const bathroom = req.body.bathroom;
-  const showers = req.body.showers;
-  const benchSpace = req.body.benchSpace;
-  const vendingMachine = req.body.vendingMachine;
-  const locationName = (address + " " + courtNumber);
-  const locationID = (address + "/" + courtNumber).replace(/\s/g, '');
 
-  const newLocation = new Location({
-    locationName: locationName,
-    locationID: locationID,
-    courtNumber: courtNumber,
-    address: address,
-    indoor: indoor,
-    lockerRoom: lockerRoom,
-    bathroom: bathroom,
-    showers: showers,
-    benchSpace: benchSpace,
-    vendingMachine: vendingMachine
-  });
-
-  // Find in the database if the location already exists, if not create it
-  if (await Location.findOne({ locationID: locationID })) {
-    return res.status(409).json({ message: "Location already exists" });
-  }
-  else {
-    try {
-      console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new location with locationID: ${newLocation.locationID}`);
-      await newLocation.save();
-      return res.status(200).json({ message: "Location saved successfully" });
-    } catch (err) {
-      console.error(err);
-      return res.status(400).json({ message: err });
-    }
-  }
-}
-
-// Remove a location (admin)
-exports.removeLocation = async (req, res) => {
-  const locationID = req.body.locationID;
-  const location = await Location.findOne({ locationID: locationID });
-
-  if (!location) {
-    return res.status(404).json({ message: "Location does not exist" });
-  }
-  else {
-    try {
-      console.log('\x1b[37m%s\x1b[0m', `Attempting to delete location with locationID: ${location.locationID}`);
-      await Location.deleteOne({ locationID: locationID });
-      return res.status(200).json({ message: "Location deleted successfully" });
-    } catch (err) {
-      return res.status(500).json({ message: err });
-    }
-  }
-}
-
-// Get all locations in a list (admin)
-exports.locationList = async (req, res) => {
-  try {
-    const locations = await Location.find();
-    return res.status(200).json(locations);
-  } catch (err) {
-    return res.status(500).json({ message: err });
-  }
-}

@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema({
         type: Number, //###     (in cm)
         required: true,
     },
+    requests: {
+        type: Object,
+        default: []
+    },
     admin: {
         type: Boolean,
         default: false,
