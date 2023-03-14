@@ -49,11 +49,6 @@ exports.addGame = async (req, res) => {
         try {
           console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new game created by ${createdByUser}`);
           await newGame.save();
-          // For each participant, send a request using the sendRequest function
-          for (let i = 0; i < newGame.participants.length; i++) {
-            console.log('\x1b[37m%s\x1b[0m', `Attempting to send a request to ${newGame.participants[i]}`);
-            await sendRequest(newGame.participants[i]);
-          }
           return res.status(200).json({ message: "Game saved successfully" });
         } catch (err) {
           console.log(err)
@@ -78,6 +73,11 @@ exports.approveGame = async (req, res) => {
       console.log('\x1b[37m%s\x1b[0m', `Attempting to approve game with gameID: ${game.gameID}`);
       game.approved = true;
       await game.save();
+      // For each participant, send a request using the sendRequest function
+      for (let i = 0; i < newGame.participants.length; i++) {
+        console.log('\x1b[37m%s\x1b[0m', `Attempting to send a request to ${newGame.participants[i]}`);
+        await sendRequest(newGame.participants[i]);
+      }
       return res.status(200).json({ message: "Game approved successfully" });
     } catch (err) {
       return res.status(500).json({ message: err });
