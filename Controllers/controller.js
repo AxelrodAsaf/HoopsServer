@@ -18,7 +18,7 @@ exports.addGame = async (req, res) => {
   const price = req.body.price;
   const createdByUser = req.body.createdByUser;
   const approved = req.body.approved;
-  const participants = [createdByUser===""? req.body.participants : [...req.body.participants, req.body.createdByUser]];
+  const participants = createdByUser===""? req.body.participants : [...req.body.participants, req.body.createdByUser];
   const gameID = date + "/" + startTime + "/" + address;
 
   const newGame = new Game({
