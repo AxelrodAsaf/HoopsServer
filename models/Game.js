@@ -63,7 +63,7 @@ const gameSchema = new mongoose.Schema({
     type: Number,
     required: true
   }
-});
+}, {timestamps: true});
 
 // This defines the maximum amount of players in a game as the maximumPlayers value
 gameSchema.path('participants').validate(function (participants) {
