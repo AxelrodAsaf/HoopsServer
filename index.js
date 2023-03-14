@@ -50,6 +50,7 @@ app.post("/approveGame", controller.approveGame);
 app.post("/rejectGame", controller.rejectGame);
 app.post("/removeGame", controller.removeGame);
 app.post("/gameList", controller.gameList);
+app.post("/allGamesList", controller.allGamesList);
 
 // Run the server on port with a console.log to tell the backend "developer"
 app.listen(port, () => {

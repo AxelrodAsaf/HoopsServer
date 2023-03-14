@@ -18,7 +18,7 @@ exports.addGame = async (req, res) => {
   const price = req.body.price;
   const createdByUser = req.body.createdByUser;
   const approved = req.body.approved;
-  const participants = [createdByUser];
+  const participants = [createdByUser===""? null : createdByUser];
   const gameID = date + "/" + startTime + "/" + address;
 
   const newGame = new Game({
@@ -28,13 +28,13 @@ exports.addGame = async (req, res) => {
     gameID: gameID,
     startTime: startTime,
     endTime: endTime,
-    participants: participants,
     maximumPlayers: maximumPlayers,
     createdByUser: createdByUser,
+    participants: participants,
     ageMin: ageMin,
     ageMax: ageMax,
     level: level,
-    tlvpremium: tlvpremium,
+    tlvpremium: (price <= 0)? false : true,
     approved: approved,
     price: price
   });
@@ -123,10 +123,20 @@ exports.removeGame = async (req, res) => {
   }
 }
 
-// Get all games
+// Get all approved games
 exports.gameList = async (req, res) => {
   try {
-    const games = await Game.find().populate("participants");
+    const games = await Game.find({ approved: true });
+    return res.status(200).json(games);
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+}
+
+// Get all games
+exports.allGamesList = async (req, res) => {
+  try {
+    const games = await Game.find();
     return res.status(200).json(games);
   } catch (err) {
     return res.status(500).json({ message: err });
@@ -265,40 +275,40 @@ exports.addPlayer = async (req, res) => {
 
 // Edit a player's information
 exports.editPlayer = async (req, res) => {
-  const firstName = req.body.firstName;
-  const lastName = req.body.lastName;
-  const email = req.body.email;
-  const birthDate = req.body.birthDate;
-  const phoneNumber = req.body.phoneNumber;
-  const preferredPosition = req.body.preferredPosition;
-  const height = req.body.height;
+  console.log(req.body)
+  const firstName = req.body.firstName? req.body.firstName : "";
+  const lastName = req.body.lastName? req.body.lastName : "";
+  const email = req.body.email? req.body.email : "";
+  const birthDate = req.body.birthDate? req.body.birthDate : "";
+  const phoneNumber = req.body.phoneNumber? req.body.phoneNumber : "";
+  const preferredPosition = req.body.preferredPosition? req.body.preferredPosition : "";
+  const height = req.body.height? req.body.height : "";
   const admin = req.body.admin;
 
-  if (!firstName || !lastName || !email || !birthDate || !phoneNumber || !preferredPosition || !height) {
-    return res.status(400).json({ message: "Please enter all fields" });
-  }
-
   try {
-    const existingUser = await User.findOne({ phoneNumber: phoneNumber });
+    const existingUser = await User.findOne({ email: email });
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    existingUser.firstName = firstName;
-    existingUser.lastName = lastName;
-    existingUser.email = email;
-    existingUser.birthDate = birthDate;
-    existingUser.preferredPosition = preferredPosition;
-    existingUser.height = height;
-    existingUser.admin = admin;
+    existingUser.firstName = (firstName === "")? existingUser.firstName : firstName;
+    existingUser.lastName = (lastName === "")? existingUser.lastName : lastName;
+    existingUser.email = (email === "")? existingUser.email : email;
+    existingUser.birthDate = (birthDate === "")? existingUser.birthDate : birthDate;
+    existingUser.phoneNumber = (phoneNumber === "")? existingUser.phoneNumber : phoneNumber;
+    existingUser.preferredPosition = (preferredPosition === "")? existingUser.preferredPosition : preferredPosition;
+    existingUser.height = (height === "")? existingUser.height : height;
+    existingUser.admin = (admin === "")? existingUser.admin : admin;
 
     const savedUser = await existingUser.save();
     console.log('\x1b[37m%s\x1b[0m', `Attempting to update user with email: ${savedUser.email}`);
     return res.status(200).json({ message: "User updated successfully" });
   } catch (err) {
     if (err.code === 11000) { // Duplicate Key
+      console.log(err);
       return res.status(409).json({ message: err });
     } else { // Different error
+      console.log(err);
       return res.status(500).json({ message: err });
     }
   }
@@ -351,9 +361,8 @@ exports.playerList = async (req, res) => {
     const users = await User.find();
     return res.status(200).json(users);
   } catch (err) {
-    // console.log(err)
+    console.log(err)
     return res.status(500).json({ message: err });
   }
 }
-
 
