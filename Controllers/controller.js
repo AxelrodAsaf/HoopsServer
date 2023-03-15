@@ -14,14 +14,15 @@ exports.addGame = async (req, res) => {
   const maximumPlayers = req.body.maximumPlayers;
   const ageMax = req.body.ageMax;
   const level = req.body.level;
-  const tlvpremium = req.body.tlvpremium;
   const price = req.body.price;
   const createdByUser = req.body.createdByUser;
   const approved = req.body.approved;
-  const participants = createdByUser===""? req.body.participants : [...req.body.participants, req.body.createdByUser];
+  const participants = req.body.createdByUser;
+  const requestArray = req.body.participants;
   const gameID = date + "/" + startTime + "/" + address;
 
   const newGame = new Game({
+    requestArray: requestArray,
     courtName: courtName,
     address: address,
     date: date,
@@ -34,7 +35,7 @@ exports.addGame = async (req, res) => {
     ageMin: ageMin,
     ageMax: ageMax,
     level: level,
-    tlvpremium: (price <= 0)? false : true,
+    tlvpremium: (price <= 0) ? false : true,
     approved: approved,
     price: price
   });
@@ -46,44 +47,72 @@ exports.addGame = async (req, res) => {
     return res.status(409).json({ message: "Game already exists" });
   }
   else {
-        try {
-          console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new game created by ${createdByUser}`);
-          await newGame.save();
-          return res.status(200).json({ message: "Game saved successfully" });
-        } catch (err) {
-          console.log(err)
-          return res.status(500).json({ message: err });
-        }
+    try {
+      console.log('\x1b[37m%s\x1b[0m', `Attempting to save a new game created by ${createdByUser}`);
+      await newGame.save();
+      return res.status(200).json({ message: "Game saved successfully" });
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ message: err });
+    }
+  }
+};
+
+// Send a request to a player
+async function sendRequest(gameID, player) {
+  try {
+    console.log(`SEND REQUEST: GAME-${gameID} PLAYER-${player}`);
+    const game = await Game.findOne({ gameID: gameID });
+    const user = await User.findOne({ email: player }).lean();
+
+    if (!game) {
+      console.log("Game does not exist");
+    } else if (game.participants.includes(player)) {
+      console.log("Player already in game");
+    } else if (!user) {
+      console.log("User does not exist");
+    } else {
+      console.log('Adding request to user:', user);
+      user.requests.push({ gameID: gameID, approved: false });
+      console.log('Saving user to database:', user);
+      await User.updateOne({ email: player }, { $set: { requests: user.requests } });
+      console.log('Request sent successfully');
+    }
+  } catch (err) {
+    console.log(err);
   }
 };
 
 // Approve a game (admin)
 exports.approveGame = async (req, res) => {
   const gameID = req.body.gameID;
-  const game = await Game.findOne({ gameID: gameID });
 
-  if (!game) {
-    return res.status(404).json({ message: "Game does not exist" });
-  }
-  else if (game.approved === true) {
-    return res.status(409).json({ message: "Game already approved" });
-  }
-  else {
-    try {
-      console.log('\x1b[37m%s\x1b[0m', `Attempting to approve game with gameID: ${game.gameID}`);
-      game.approved = true;
-      await game.save();
-      // For each participant, send a request using the sendRequest function
-      for (let i = 0; i < newGame.participants.length; i++) {
-        console.log('\x1b[37m%s\x1b[0m', `Attempting to send a request to ${newGame.participants[i]}`);
-        await sendRequest(newGame.participants[i]);
-      }
-      return res.status(200).json({ message: "Game approved successfully" });
-    } catch (err) {
-      return res.status(500).json({ message: err });
+  try {
+    const game = await Game.findOne({ gameID: gameID });
+    if (!game) {
+      return res.status(404).json({ message: "Game does not exist" });
     }
+    console.log(game)
+    const requestArray = game.requestArray;
+    console.log(requestArray)
+    if (game.approved) {
+      return res.status(409).json({ message: "Game already approved" });
+    }
+    console.log('\x1b[37m%s\x1b[0m', `APPROVEGAME: Attempting to approve game with gameID: ${game.gameID}`);
+    game.approved = true;
+    // For each participant, send a request using the sendRequest function
+    for (let i = 0; i < requestArray.length; i++) {
+      console.log('\x1b[37m%s\x1b[0m', `APPROVEGAME: Attempting to send a request to ${requestArray[i]}`);
+      await sendRequest(gameID, requestArray[i]);
+    }
+    await game.save();
+    return res.status(200).json({ message: "Game approved successfully" });
+  } catch (err) {
+    console.error(`ERROR: ${err.message}`);
+    return res.status(500).json({ message: err });
   }
 }
+
 
 // Reject a game (admin)
 exports.rejectGame = async (req, res) => {
@@ -112,14 +141,13 @@ exports.rejectGame = async (req, res) => {
 exports.removeGame = async (req, res) => {
   const gameID = req.body.gameID;
   const game = await Game.findOne({ gameID: gameID });
-  console.log(gameID, game)
 
   if (!game) {
     return res.status(404).json({ message: "Game does not exist" });
   }
   else {
     try {
-      console.log('\x1b[37m%s\x1b[0m', `Attempting to delete game with gameID: ${game.gameID}`);
+      // console.log('\x1b[37m%s\x1b[0m', `Attempting to delete game with gameID: ${game.gameID}`);
       await Game.deleteOne({ gameID: gameID });
       return res.status(200).json({ message: "Game deleted successfully" });
     } catch (err) {
@@ -199,34 +227,6 @@ exports.approveRequest = async (req, res) => {
   }
 };
 
-// Send a request to a player
-exports.sendRequest = async (req, res) => {
-  try {
-    const gameID = req.body.gameID;
-    const player = req.body.player;
-    const game = await Game.findOne({ gameID: gameID });
-    const user = await User.findOne({ email: player }).lean();
-
-    if (!game) {
-      return res.status(404).json({ message: "Game does not exist" });
-    } else if (game.participants.includes(player)) {
-      return res.status(409).json({ message: "Player already in game" });
-    } else if (!user) {
-      return res.status(404).json({ message: "User does not exist" });
-    } else {
-      console.log('Adding request to user:', user);
-      user.requests.push({ gameID: gameID, approved: false });
-      console.log('Saving user to database:', user);
-      await User.updateOne({ email: player }, { $set: { requests: user.requests } });
-      console.log('Request sent successfully');
-      return res.status(200).json({ message: "Request sent successfully" });
-    }
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: err });
-  }
-};
-
 // Reject a request to join a game
 exports.rejectRequest = async (req, res) => {
   try {
@@ -243,7 +243,7 @@ exports.rejectRequest = async (req, res) => {
     }
     else {
       // Remove the request from the player's request list
-      user.requests = user.requests.filter(request => request.gameID!== gameID);
+      user.requests = user.requests.filter(request => request.gameID !== gameID);
       await user.save();
       return res.status(200).json({ message: "Request rejected successfully" });
     }
@@ -281,13 +281,13 @@ exports.addPlayer = async (req, res) => {
 // Edit a player's information
 exports.editPlayer = async (req, res) => {
   console.log(req.body)
-  const firstName = req.body.firstName? req.body.firstName : "";
-  const lastName = req.body.lastName? req.body.lastName : "";
-  const email = req.body.email? req.body.email : "";
-  const birthDate = req.body.birthDate? req.body.birthDate : "";
-  const phoneNumber = req.body.phoneNumber? req.body.phoneNumber : "";
-  const preferredPosition = req.body.preferredPosition? req.body.preferredPosition : "";
-  const height = req.body.height? req.body.height : "";
+  const firstName = req.body.firstName ? req.body.firstName : "";
+  const lastName = req.body.lastName ? req.body.lastName : "";
+  const email = req.body.email ? req.body.email : "";
+  const birthDate = req.body.birthDate ? req.body.birthDate : "";
+  const phoneNumber = req.body.phoneNumber ? req.body.phoneNumber : "";
+  const preferredPosition = req.body.preferredPosition ? req.body.preferredPosition : "";
+  const height = req.body.height ? req.body.height : "";
   const admin = req.body.admin;
 
   try {
@@ -296,14 +296,14 @@ exports.editPlayer = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    existingUser.firstName = (firstName === "")? existingUser.firstName : firstName;
-    existingUser.lastName = (lastName === "")? existingUser.lastName : lastName;
-    existingUser.email = (email === "")? existingUser.email : email;
-    existingUser.birthDate = (birthDate === "")? existingUser.birthDate : birthDate;
-    existingUser.phoneNumber = (phoneNumber === "")? existingUser.phoneNumber : phoneNumber;
-    existingUser.preferredPosition = (preferredPosition === "")? existingUser.preferredPosition : preferredPosition;
-    existingUser.height = (height === "")? existingUser.height : height;
-    existingUser.admin = (admin === "")? existingUser.admin : admin;
+    existingUser.firstName = (firstName === "") ? existingUser.firstName : firstName;
+    existingUser.lastName = (lastName === "") ? existingUser.lastName : lastName;
+    existingUser.email = (email === "") ? existingUser.email : email;
+    existingUser.birthDate = (birthDate === "") ? existingUser.birthDate : birthDate;
+    existingUser.phoneNumber = (phoneNumber === "") ? existingUser.phoneNumber : phoneNumber;
+    existingUser.preferredPosition = (preferredPosition === "") ? existingUser.preferredPosition : preferredPosition;
+    existingUser.height = (height === "") ? existingUser.height : height;
+    existingUser.admin = (admin === "") ? existingUser.admin : admin;
 
     const savedUser = await existingUser.save();
     console.log('\x1b[37m%s\x1b[0m', `Attempting to update user with email: ${savedUser.email}`);

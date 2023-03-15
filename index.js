@@ -36,7 +36,6 @@ app.use(authorization.token);
 
 // Player section
 app.post("/approveRequest", controller.approveRequest);
-app.post("/sendRequest", controller.sendRequest);
 app.post("/rejectRequest", controller.rejectRequest);
 app.post("/addPlayer", controller.addPlayer);
 app.post("/editPlayer", controller.editPlayer);
