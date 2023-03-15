@@ -4,40 +4,23 @@ require('dotenv').config();
 
 // Create a new game
 exports.addGame = async (req, res) => {
-  console.log(req.body)
-  const courtName = req.body.courtName;
-  const address = req.body.address;
-  const date = req.body.date;
-  const startTime = req.body.startTime;
-  const endTime = req.body.endTime;
-  const ageMin = req.body.ageMin;
-  const maximumPlayers = req.body.maximumPlayers;
-  const ageMax = req.body.ageMax;
-  const level = req.body.level;
-  const price = req.body.price;
-  const createdByUser = req.body.createdByUser;
-  const approved = req.body.approved;
-  const participants = req.body.createdByUser;
-  const requestArray = req.body.participants;
-  const gameID = date + "/" + startTime + "/" + address;
-
   const newGame = new Game({
-    requestArray: requestArray,
-    courtName: courtName,
-    address: address,
-    date: date,
-    gameID: gameID,
-    startTime: startTime,
-    endTime: endTime,
-    maximumPlayers: maximumPlayers,
-    createdByUser: createdByUser,
-    participants: participants,
-    ageMin: ageMin,
-    ageMax: ageMax,
-    level: level,
-    tlvpremium: (price <= 0) ? false : true,
-    approved: approved,
-    price: price
+    requestArray: req.body.participants,
+    courtName: req.body.courtName,
+    address: req.body.address,
+    date: req.body.date,
+    gameID: req.body.date + "/" + req.body.startTime + "/" + req.body.address,
+    startTime: req.body.startTime,
+    endTime: req.body.endTime,
+    maximumPlayers: req.body.maximumPlayers,
+    createdByUser: req.body.createdByUser,
+    participants: req.body.createdByUser,
+    ageMin: req.body.ageMin,
+    ageMax: req.body.ageMax,
+    level: req.body.level,
+    approved: req.body.approved,
+    price: req.body.price,
+    tlvpremium: (price <= 0) ? false : true
   });
 
   console.log(newGame);
@@ -101,7 +84,7 @@ exports.approveGame = async (req, res) => {
     console.log('\x1b[37m%s\x1b[0m', `APPROVEGAME: Attempting to approve game with gameID: ${game.gameID}`);
     game.approved = true;
     // For each participant, send a request using the sendRequest function
-    for (let i = 0; i < requestArray.length; i++) {
+    for (let i = 0; i < requestArray?.length; i++) {
       console.log('\x1b[37m%s\x1b[0m', `APPROVEGAME: Attempting to send a request to ${requestArray[i]}`);
       await sendRequest(gameID, requestArray[i]);
     }
