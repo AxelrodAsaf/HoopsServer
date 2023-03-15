@@ -20,7 +20,7 @@ exports.addGame = async (req, res) => {
     level: req.body.level,
     approved: req.body.approved,
     price: req.body.price,
-    tlvpremium: (price <= 0) ? false : true
+    tlvpremium: ( req.body.price <= 0) ? false : true
   });
 
   console.log(newGame);
