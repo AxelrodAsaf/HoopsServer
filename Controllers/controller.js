@@ -4,25 +4,39 @@ require('dotenv').config();
 
 // Create a new game
 exports.addGame = async (req, res) => {
-  const gameID = req.body.date + "/" + req.body.startTime + "/" + req.body.address;
+  console.log(req.body)
+  const courtName = req.body.courtName;
+  const address = req.body.address;
+  const date = req.body.date;
+  const startTime = req.body.startTime;
+  const endTime = req.body.endTime;
+  const ageMin = req.body.ageMin;
+  const maximumPlayers = req.body.maximumPlayers;
+  const ageMax = req.body.ageMax;
+  const level = req.body.level;
+  const price = req.body.price;
+  const createdByUser = req.body.createdByUser? req.body.createdByUser : "";
+  const approved = req.body.approved;
+  const participants = req.body.createdByUser? req.body.createdByUser : "";
+  const gameID = date + "/" + startTime + "/" + address;
 
   const newGame = new Game({
     requestArray: req.body.participants,
-    courtName: req.body.courtName,
-    address: req.body.address,
-    date: req.body.date,
+    courtName: courtName,
+    address: address,
+    date: date,
     gameID: gameID,
-    startTime: req.body.startTime,
-    endTime: req.body.endTime,
-    maximumPlayers: req.body.maximumPlayers,
-    createdByUser: req.body.createdByUser,
-    participants: req.body.createdByUser,
-    ageMin: req.body.ageMin,
-    ageMax: req.body.ageMax,
-    level: req.body.level,
-    approved: req.body.approved,
-    price: req.body.price,
-    tlvpremium: ( req.body.price <= 0) ? false : true
+    startTime: startTime,
+    endTime: endTime,
+    maximumPlayers: maximumPlayers,
+    createdByUser: createdByUser,
+    participants: participants,
+    ageMin: ageMin,
+    ageMax: ageMax,
+    level: level,
+    tlvpremium: (price <= 0) ? false : true,
+    approved: approved,
+    price: price
   });
 
   console.log(newGame);
