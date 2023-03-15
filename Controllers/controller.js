@@ -4,12 +4,14 @@ require('dotenv').config();
 
 // Create a new game
 exports.addGame = async (req, res) => {
+  const gameID = req.body.date + "/" + req.body.startTime + "/" + req.body.address;
+
   const newGame = new Game({
     requestArray: req.body.participants,
     courtName: req.body.courtName,
     address: req.body.address,
     date: req.body.date,
-    gameID: req.body.date + "/" + req.body.startTime + "/" + req.body.address,
+    gameID: gameID,
     startTime: req.body.startTime,
     endTime: req.body.endTime,
     maximumPlayers: req.body.maximumPlayers,
