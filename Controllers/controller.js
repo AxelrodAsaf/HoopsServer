@@ -113,7 +113,6 @@ exports.approveGame = async (req, res) => {
   }
 }
 
-
 // Reject a game (admin)
 exports.rejectGame = async (req, res) => {
   const gameID = req.body.gameID;
@@ -184,6 +183,8 @@ exports.approveRequest = async (req, res) => {
 
     // Check that the gameID and player fields are present in the request body
     if (!gameID || !player) {
+      // Remove the request from the user's request list
+      user.requests = user.requests.filter(request => request.gameID !== gameID);
       return res.status(400).json({ message: "Missing gameID or player field in request body" });
     }
 
@@ -191,12 +192,20 @@ exports.approveRequest = async (req, res) => {
     const game = await Game.findOne({ gameID });
     const user = await User.findOne({ email: player });
     if (!game || !user) {
+      // Remove the request from the user's request list
+      user.requests = user.requests.filter(request => request.gameID !== gameID);
+      // Update the user object in the database
+      await User.updateOne({ email: player }, { requests: user.requests });
       return res.status(404).json({ message: "Game or player does not exist" });
     }
 
     // Find the request in the user's requests array
     const request = user.requests.find(request => request.gameID === gameID);
     if (!request) {
+      // Remove the request from the user's request list
+      user.requests = user.requests.filter(request => request.gameID !== gameID);
+      // Update the user object in the database
+      await User.updateOne({ email: player }, { requests: user.requests });
       return res.status(404).json({ message: "Request does not exist" });
     }
 
@@ -204,7 +213,6 @@ exports.approveRequest = async (req, res) => {
     if (game.participants.includes(player)) {
       // Remove the request from the user's request list
       user.requests = user.requests.filter(request => request.gameID !== gameID);
-
       // Update the user object in the database
       await User.updateOne({ email: player }, { requests: user.requests });
 
@@ -236,15 +244,24 @@ exports.rejectRequest = async (req, res) => {
     const user = await User.findOne({ email: player });
 
     if (!game) {
+      // Remove the request from the user's request list
+      user.requests = user.requests.filter(request => request.gameID !== gameID);
+      // Update the user object in the database
+      await User.updateOne({ email: player }, { requests: user.requests });
       return res.status(404).json({ message: "Game does not exist" });
     }
     else if (!user) {
+      // Remove the request from the user's request list
+      user.requests = user.requests.filter(request => request.gameID !== gameID);
+      // Update the user object in the database
+      await User.updateOne({ email: player }, { requests: user.requests });
       return res.status(404).json({ message: "User does not exist" });
     }
     else {
-      // Remove the request from the player's request list
+      // Remove the request from the user's request list
       user.requests = user.requests.filter(request => request.gameID !== gameID);
-      await user.save();
+      // Update the user object in the database
+      await User.updateOne({ email: player }, { requests: user.requests });
       return res.status(200).json({ message: "Request rejected successfully" });
     }
   }
