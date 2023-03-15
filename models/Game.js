@@ -62,6 +62,10 @@ const gameSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: true
+  },
+  requestArray: {
+    type: Array,
+    default: []
   }
 }, {timestamps: true});
 
