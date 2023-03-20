@@ -132,7 +132,7 @@ exports.token = async (req, res, next) => {
   else {
     // !!!NOTE THAT IF THE NEXT LINE DOES NOT START WITH 'RETURN' THEN THE TOKEN IS NOT RELEVANT!!!
     console.log('\x1b[31m%s\x1b[0m', `No token verified for the request`);
-    return res.status(401).json({ message: "Unauthorized" });
+    res.status(401).json({ message: "Unauthorized" });
   }
   // Continue to the next handler (with or without the user's email)
   next();
