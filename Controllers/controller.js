@@ -185,6 +185,7 @@ exports.approveRequest = async (req, res) => {
     if (!gameID || !player) {
       // Remove the request from the user's request list
       user.requests = user.requests.filter(request => request.gameID !== gameID);
+      await User.updateOne({ email: player }, { requests: user.requests });
       return res.status(400).json({ message: "Missing gameID or player field in request body" });
     }
 
@@ -297,15 +298,15 @@ exports.addPlayer = async (req, res) => {
 
 // Edit a player's information
 exports.editPlayer = async (req, res) => {
-  console.log(req.body)
-  const firstName = req.body.firstName ? req.body.firstName : "";
-  const lastName = req.body.lastName ? req.body.lastName : "";
-  const email = req.body.email ? req.body.email : "";
-  const birthDate = req.body.birthDate ? req.body.birthDate : "";
-  const phoneNumber = req.body.phoneNumber ? req.body.phoneNumber : "";
-  const preferredPosition = req.body.preferredPosition ? req.body.preferredPosition : "";
-  const height = req.body.height ? req.body.height : "";
-  const admin = req.body.admin;
+  console.log(req.body.userUpdateObject)
+  const firstName = req.body.userUpdateObject.firstName ? req.body.userUpdateObject.firstName : "";
+  const lastName = req.body.userUpdateObject.lastName ? req.body.userUpdateObject.lastName : "";
+  const email = req.body.userUpdateObject.email ? req.body.userUpdateObject.email : "";
+  const birthDate = req.body.userUpdateObject.birthDate ? req.body.userUpdateObject.birthDate : "";
+  const phoneNumber = req.body.userUpdateObject.phoneNumber ? req.body.userUpdateObject.phoneNumber : "";
+  const preferredPosition = req.body.userUpdateObject.preferredPosition ? req.body.userUpdateObject.preferredPosition : "";
+  const height = req.body.userUpdateObject.height ? req.body.userUpdateObject.height : "";
+  const admin = req.body.userUpdateObject.admin;
 
   try {
     const existingUser = await User.findOne({ email: email });

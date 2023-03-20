@@ -33,12 +33,12 @@ exports.signup = async (req, res) => {
     admin: admin
   });
 
-  if (!firstName ||!lastName ||!email ||!birthDate ||!phoneNumber ||!preferredPosition ||!height) {
-    return res.status(400).json({message: "Please enter all fields"});
+  if (!firstName || !lastName || !email || !birthDate || !phoneNumber || !preferredPosition || !height) {
+    return res.status(400).json({ message: "Please enter all fields" });
   }
   else {
-    const tempCheck = await User.findOne({phoneNumber: phoneNumber});
-    const tempCheck2 = await User.findOne({email: email});
+    const tempCheck = await User.findOne({ phoneNumber: phoneNumber });
+    const tempCheck2 = await User.findOne({ email: email });
     // Check to see if there is already a user with that phoneNumber
     if (tempCheck) {
       return res.status(408).json({ message: "Phone number already in use" });
@@ -111,12 +111,12 @@ exports.login = async (req, res) => {
 
 // When the client makes any request to the server (other than login/signup), check if the token is valid
 exports.token = async (req, res, next) => {
-  if (req.headers.authorization !== undefined) {
-    token = req.headers.authorization
+  if (req.body.Authorization !== undefined) {
+    token = req.body.Authorization;
     // Verify token
     if (token !== undefined) {
-      var payload = '';
       try {
+      var payload = '';
         // Verify the JWT
         payload = jwt.verify(token, secretKey);
         // Access the payload of the JWT
@@ -131,7 +131,8 @@ exports.token = async (req, res, next) => {
   }
   else {
     // !!!NOTE THAT IF THE NEXT LINE DOES NOT START WITH 'RETURN' THEN THE TOKEN IS NOT RELEVANT!!!
-    // console.log('\x1b[31m%s\x1b[0m', `No token verified for the request`);
+    console.log('\x1b[31m%s\x1b[0m', `No token verified for the request`);
+    return res.status(401).json({ message: "Unauthorized" });
   }
   // Continue to the next handler (with or without the user's email)
   next();

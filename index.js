@@ -33,6 +33,7 @@ app.post("/login", authorization.login);
 
 // Using app.use make sure that the token is valid for all requests
 app.use(authorization.token);
+app.post("/checkToken", authorization.token);
 
 // Player section
 app.post("/approveRequest", controller.approveRequest);
